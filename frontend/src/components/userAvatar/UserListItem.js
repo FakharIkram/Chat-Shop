@@ -1,43 +1,33 @@
-import { Avatar } from "@chakra-ui/avatar";
-import { Box, Text } from "@chakra-ui/layout";
-import { ChatState } from "../../Context/ChatProvider";
+const getInitials = (name) =>
+  name ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "?";
 
-const UserListItem = ({ handleFunction }) => {
-  const { user } = ChatState();
-
+const UserListItem = ({ user, handleFunction }) => {
   return (
-    <Box
+    <div
       onClick={handleFunction}
-      cursor="pointer"
-      bg="#E8E8E8"
-      _hover={{
-        background: "#38B2AC",
-        color: "white",
+      style={{
+        display: "flex", alignItems: "center", gap: "12px",
+        padding: "10px 12px", borderRadius: "10px", cursor: "pointer",
+        transition: "background 0.15s", marginBottom: "4px",
       }}
-      w="100%"
-      d="flex"
-      alignItems="center"
-      color="black"
-      px={3}
-      py={2}
-      mb={2}
-      borderRadius="lg"
+      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-hover)"}
+      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
     >
-      <Avatar
-        mr={2}
-        size="sm"
-        cursor="pointer"
-        name={user.name}
-        src={user.pic}
-      />
-      <Box>
-        <Text>{user.name}</Text>
-        <Text fontSize="xs">
-          <b>Email : </b>
-          {user.email}
-        </Text>
-      </Box>
-    </Box>
+      <div style={{
+        width: "40px", height: "40px", borderRadius: "12px", flexShrink: 0,
+        background: "linear-gradient(135deg, var(--accent), #9B8DF9)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "#fff", fontSize: "14px", fontWeight: "600", overflow: "hidden",
+      }}>
+        {user.pic
+          ? <img src={user.pic} alt={user.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : getInitials(user.name)}
+      </div>
+      <div>
+        <div style={{ fontSize: "14px", fontWeight: "500", color: "var(--text-primary)" }}>{user.name}</div>
+        <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{user.email}</div>
+      </div>
+    </div>
   );
 };
 

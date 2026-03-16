@@ -82,4 +82,56 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { allUsers, registerUser, authUser };
+//@description     Update user profile (name, email, pic, password)
+//@route           PUT /api/user/profile
+//@access          Protected
+const updateProfile = asyncHandler(async (req, res) => {
+  const { name, email, pic, currentPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // If user wants to change password, verify current password first
+  if (newPassword) {
+    if (!currentPassword) {
+      res.status(400);
+      throw new Error("Please provide your current password");
+    }
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(401);
+      throw new Error("Current password is incorrect");
+    }
+    user.password = newPassword;
+  }
+
+  // Check if new email is already taken by someone else
+  if (email && email !== user.email) {
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      res.status(400);
+      throw new Error("Email is already in use");
+    }
+    user.email = email;
+  }
+
+  user.name = name || user.name;
+  user.pic = pic || user.pic;
+
+  const updatedUser = await user.save();
+
+  res.json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    isAdmin: updatedUser.isAdmin,
+    pic: updatedUser.pic,
+    token: generateToken(updatedUser._id),
+  });
+});
+
+module.exports = { allUsers, registerUser, authUser, updateProfile };

@@ -7,7 +7,7 @@ const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
 
-dotenv.config();
+dotenv.config({ path: __dirname + '/.env' });
 connectDB();
 const app = express();
 
@@ -46,7 +46,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT;
 
 const server = app.listen(
-  PORT,
+  PORT || 5000,
   console.log(`Server running on PORT ${PORT}...`.yellow.bold)
 );
 

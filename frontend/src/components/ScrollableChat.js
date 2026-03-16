@@ -1,51 +1,59 @@
-import { Avatar } from "@chakra-ui/avatar";
-import { Tooltip } from "@chakra-ui/tooltip";
 import ScrollableFeed from "react-scrollable-feed";
-import {
-  isLastMessage,
-  isSameSender,
-  isSameSenderMargin,
-  isSameUser,
-} from "../config/ChatLogics";
+import { isSameSender, isLastMessage, isSameUser } from "../config/ChatLogics";
 import { ChatState } from "../Context/ChatProvider";
 
 const ScrollableChat = ({ messages }) => {
   const { user } = ChatState();
 
+  const getInitials = (name) =>
+    name ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "?";
+
   return (
     <ScrollableFeed>
-      {messages &&
-        messages.map((m, i) => (
-          <div style={{ display: "flex" }} key={m._id}>
-            {(isSameSender(messages, m, i, user._id) ||
-              isLastMessage(messages, i, user._id)) && (
-              <Tooltip label={m.sender.name} placement="bottom-start" hasArrow>
-                <Avatar
-                  mt="7px"
-                  mr={1}
-                  size="sm"
-                  cursor="pointer"
-                  name={m.sender.name}
-                  src={m.sender.pic}
-                />
-              </Tooltip>
+      {messages?.map((m, i) => {
+        const isSent = m.sender._id === user._id;
+        const showAvatar = !isSent && (isSameSender(messages, m, i, user._id) || isLastMessage(messages, i, user._id));
+        const compactTop = isSameUser(messages, m, i, user._id);
+
+        return (
+          <div
+            key={m._id}
+            className={`msg-row ${isSent ? "sent" : "recv"}`}
+            style={{ marginTop: compactTop ? "2px" : "12px" }}
+          >
+            {/* Avatar for received messages */}
+            {!isSent && (
+              showAvatar ? (
+                <div
+                  className="msg-avatar"
+                  title={m.sender.name}
+                  style={{ cursor: "pointer" }}
+                >
+                  {m.sender.pic
+                    ? <img src={m.sender.pic} alt={m.sender.name} style={{width:"100%",height:"100%",objectFit:"cover"}} />
+                    : getInitials(m.sender.name)}
+                </div>
+              ) : (
+                <div className="msg-avatar-placeholder" />
+              )
             )}
-            <span
-              style={{
-                backgroundColor: `${
-                  m.sender._id === user._id ? "#BEE3F8" : "#B9F5D0"
-                }`,
-                marginLeft: isSameSenderMargin(messages, m, i, user._id),
-                marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
-                borderRadius: "20px",
-                padding: "5px 15px",
-                maxWidth: "75%",
-              }}
-            >
+
+            {/* Bubble */}
+            <div className={`msg-bubble ${isSent ? "sent" : "recv"}`}>
+              {/* Sender name for group chats */}
+              {!isSent && !isSameUser(messages, m, i, user._id) && (
+                <div style={{
+                  fontSize: "11px", fontWeight: "600",
+                  color: "var(--accent)", marginBottom: "4px"
+                }}>
+                  {m.sender.name}
+                </div>
+              )}
               {m.content}
-            </span>
+            </div>
           </div>
-        ))}
+        );
+      })}
     </ScrollableFeed>
   );
 };

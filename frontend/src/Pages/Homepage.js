@@ -1,60 +1,46 @@
-import {
-  Box,
-  Container,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-} from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
 
 function Homepage() {
   const history = useHistory();
+  const [activeTab, setActiveTab] = useState("login");
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("userInfo"));
-
     if (user) history.push("/chats");
   }, [history]);
 
   return (
-    <Container maxW="xl" centerContent>
-      <Box
-        d="flex"
-        justifyContent="center"
-        p={3}
-        bg="white"
-        w="100%"
-        m="40px 0 15px 0"
-        borderRadius="lg"
-        borderWidth="1px"
-      >
-        <Text fontSize="4xl" fontFamily="Work sans">
-          Talk-A-Tive
-        </Text>
-      </Box>
-      <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
-        <Tabs isFitted variant="soft-rounded">
-          <TabList mb="1em">
-            <Tab>Login</Tab>
-            <Tab>Sign Up</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <Login />
-            </TabPanel>
-            <TabPanel>
-              <Signup />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Box>
-    </Container>
+    <div className="home-wrapper">
+      <div className="home-glow" />
+      <div className="home-glow-2" />
+      <div className="home-card">
+        <div className="home-logo">
+          <div className="home-logo-icon">💬</div>
+          <span className="home-logo-text">Chat-Shop</span>
+        </div>
+        <div className="tab-bar">
+          <button
+            className={`tab-btn ${activeTab === "login" ? "active" : ""}`}
+            onClick={() => setActiveTab("login")}
+          >
+            Sign In
+          </button>
+          <button
+            className={`tab-btn ${activeTab === "signup" ? "active" : ""}`}
+            onClick={() => setActiveTab("signup")}
+          >
+            Create Account
+          </button>
+        </div>
+        {activeTab === "login"
+          ? <Login />
+          : <Signup onRegistered={() => setActiveTab("login")} />
+        }
+      </div>
+    </div>
   );
 }
 
